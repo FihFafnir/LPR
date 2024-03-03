@@ -1,0 +1,25 @@
+{
+    "workbench.colorCustomizations": {
+        "*.background": "#00000000",
+        "editorGroupHeader.tabsBackground": "#00000000",
+        "sideBar.background": "#00000000",
+        "sideBarSectionHeader.background": "#00000000",
+        "editor.background": "#00000000",
+        "peekViewEditor.background": "#00000000",
+        "peekViewEditorGutter.background": "#00000000",
+        "peekViewTitle.background": "#00000000",
+        "peekViewResult.background": "#00000000",
+        "tab.activeBackground": "#00000000",
+        "tab.inactiveBackground": "#00000000",
+        "statusBar.background": "#00000000",
+        "statusBar.debuggingBackground": "#00000000",
+        "statusBar.noFolderBackground": "#00000000",
+        "statusBarItem.activeBackground": "#00000000",
+        "panel.background": "#00000000",
+        "activityBar.background": "#00000000",
+        "minimap.background": "#00000000",
+        "scrollbar.shadow": "#00000000"
+    },
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.typeCheckingMode": "basic"
+}
