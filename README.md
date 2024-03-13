@@ -14,7 +14,7 @@ Clone o projeto
 Entre no diretório do projeto
 
 ```bash
-  cd my-project
+  cd LPR 
 ```
 
 Instale as dependências com o pip
