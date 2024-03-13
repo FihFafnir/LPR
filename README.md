@@ -1,10 +1,14 @@
+# LPR
+
+Aplicação para leitura de placa de automóveis em real-time utilizando Python. 
+
 
 ## Rodando localmente
 
 Clone o projeto
 
 ```bash
-  git clone https://link-para-o-projeto
+  git clone https://github.com/FihFafnir/LPR.git
 ```
 
 Entre no diretório do projeto
@@ -30,4 +34,3 @@ Execute o programa
 ```bash
   python main.py
 ```
-
