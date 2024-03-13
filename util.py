@@ -1,6 +1,7 @@
 import cv2
 import pytesseract
 import numpy as np
+import socket
 
 pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
@@ -9,6 +10,8 @@ NUM_2_ALPHA = {"0": "O", "1": "I", "2": "Z", "4": "A", "5": "S", "8": "B"}
 ALPHA_2_NUM = {"A": "5", "B": "8", "G": "0", "I": "1", "O": "0", "S": "5", "Z": "2"}
 LOWER_RANGE_COLOR = np.array([100, 127, 127])
 UPPER_RANGE_COLOR = np.array([130, 255, 255])
+
+
 # Mercosul Color in HSV: 115, 255, 153
 
 
@@ -17,14 +20,14 @@ def is_plate_format(text, is_mercosul=None):
         return False
 
     return (
-        text[:3].isalpha()
-        and text[3].isdigit()
-        and text[-2:].isdigit()
-        and (
-            True
-            if is_mercosul is None
-            else (text[4].isalpha() if is_mercosul else text[4].isdigit())
-        )
+            text[:3].isalpha()
+            and text[3].isdigit()
+            and text[-2:].isdigit()
+            and (
+                True
+                if is_mercosul is None
+                else (text[4].isalpha() if is_mercosul else text[4].isdigit())
+            )
     )
 
 
@@ -40,6 +43,7 @@ def is_mercosul_plate(plate_img):
 
 def get_possible_character(char, from_to):
     return from_to[char] if char in from_to else char
+
 
 def get_possible_plates(text, is_mercosul=None):
     plate = plate_2 = ""
@@ -58,14 +62,16 @@ def get_possible_plates(text, is_mercosul=None):
         return {plate, plate_2}
     return {plate_2} if is_mercosul else {plate}
 
+
 def treat_image(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray, (3, 3), 0)
     b_filter = cv2.bilateralFilter(blur, 11, 17, 17)
-    thresh = cv2.threshold(b_filter, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1] 
+    thresh = cv2.threshold(b_filter, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
     invert = cv2.bitwise_not(thresh)
 
     return gray, blur, b_filter, thresh, invert
+
 
 def read_plate(plate_img):
     treated_img = treat_image(plate_img)[4]
@@ -85,3 +91,13 @@ def read_plate(plate_img):
     )
 
     return set(filter(lambda string: is_plate_format(string, mercosul), strings))
+
+
+def get_ipv4():
+    try:
+        host_name = socket.gethostname()
+        ipv4_address = socket.gethostbyname(host_name)
+        return ipv4_address
+    except socket.error as e:
+        print(f"Erro ao obter o endereço IPv4: {e}")
+        return None
