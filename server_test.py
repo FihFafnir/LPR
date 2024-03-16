@@ -33,7 +33,7 @@ try:
         for x, y, w, h in plates:
             readed = read_plate(frame[y: y + h, x: x + w])
             if len(readed) > 0:
-                print("Plate:", *plates)
+                print("Plate:", *readed)
             frame = cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
         cv2.imshow("Camera:", frame)
