@@ -5,30 +5,49 @@ import socket
 
 pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
-PLATE_LENGTH = 7
 NUM_2_ALPHA = {"0": "O", "1": "I", "2": "Z", "4": "A", "5": "S", "8": "B"}
 ALPHA_2_NUM = {"A": "5", "B": "8", "G": "0", "I": "1", "O": "0", "S": "5", "Z": "2"}
 LOWER_RANGE_COLOR = np.array([100, 127, 127])
 UPPER_RANGE_COLOR = np.array([130, 255, 255])
 
 
+PLATE_LENGTH = 7
+OLD_PLATE_PATTERN = "AAA0000"
+MERCOSUL_PLATE_PATTERN = "AAA0A00"
+
 # Mercosul Color in HSV: 115, 255, 153
+
+
+def is_old_format(text):
+    if len(text) != PLATE_LENGTH:
+        return False
+
+    for i in range(PLATE_LENGTH):
+        if text[i].isalpha() != OLD_PLATE_PATTERN[i].isalpha():
+            return False
+
+    return True
+
+
+def is_mercosul_format(text):
+    if len(text) != PLATE_LENGTH:
+        return False
+
+    for i in range(PLATE_LENGTH):
+        if text[i].isalpha() != MERCOSUL_PLATE_PATTERN[i].isalpha():
+            return False
+
+    return True
 
 
 def is_plate_format(text, is_mercosul=None):
     if len(text) != PLATE_LENGTH:
         return False
 
-    return (
-            text[:3].isalpha()
-            and text[3].isdigit()
-            and text[-2:].isdigit()
-            and (
-                True
-                if is_mercosul is None
-                else (text[4].isalpha() if is_mercosul else text[4].isdigit())
-            )
-    )
+    if is_mercosul is None:
+        return is_mercosul_format(text) | is_old_format(text)
+
+    return is_mercosul_format(text) if is_mercosul else is_old_format(text)
 
 
 def is_mercosul_plate(plate_img):
@@ -46,21 +65,23 @@ def get_possible_character(char, from_to):
 
 
 def get_possible_plates(text, is_mercosul=None):
-    plate = plate_2 = ""
+    mercosul_pattern_plate = ""
+    old_pattern_plate = ""
 
-    if len(text) == PLATE_LENGTH:
-        for char in text[:3]:
-            plate += get_possible_character(char, NUM_2_ALPHA)
-        for char in text[3:]:
-            plate += get_possible_character(char, ALPHA_2_NUM)
+    if len(text) != PLATE_LENGTH:
+        return set("")
 
-        plate_2 += plate[:4]
-        plate_2 += get_possible_character(plate[4], NUM_2_ALPHA)
-        plate_2 += plate[5:]
+    for i in range(PLATE_LENGTH):
+        mercosul_pattern_plate += get_possible_character(
+            text[i], NUM_2_ALPHA if MERCOSUL_PLATE_PATTERN[i].isalpha() else ALPHA_2_NUM
+        )
+        old_pattern_plate += get_possible_character(
+            text[i], NUM_2_ALPHA if OLD_PLATE_PATTERN[i].isalpha() else ALPHA_2_NUM
+        )
 
     if is_mercosul is None:
-        return {plate, plate_2}
-    return {plate_2} if is_mercosul else {plate}
+        return {mercosul_pattern_plate, old_pattern_plate}
+    return {mercosul_pattern_plate} if is_mercosul else {old_pattern_plate}
 
 
 def treat_image(img):
@@ -83,7 +104,7 @@ def read_plate(plate_img):
     strings = pytesseract.image_to_string(
         treated_img,
         lang="por",
-        config="--psm 8 -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        config="--psm 6 -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",
     ).split()
     strings.append("".join(strings))
     strings.extend(
