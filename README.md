@@ -2,7 +2,6 @@
 
 Aplicação para leitura de placa de automóveis em real-time utilizando Python. 
 
-
 ## Rodando localmente
 
 Clone o projeto
@@ -15,6 +14,13 @@ Entre no diretório do projeto
 
 ```bash
   cd LPR 
+```
+
+Se necessário entre em um ambiente virtual
+
+```bash
+    python -m venv .venv
+    source .venv/bin/activate
 ```
 
 Instale as dependências com o pip
