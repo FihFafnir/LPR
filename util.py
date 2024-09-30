@@ -10,12 +10,15 @@ ALPHA_2_NUM = {"A": "5", "B": "8", "G": "0", "I": "1", "O": "0", "S": "5", "Z": 
 LOWER_RANGE_COLOR = np.array([100, 127, 127])
 UPPER_RANGE_COLOR = np.array([130, 255, 255])
 
-
 PLATE_LENGTH = 7
 OLD_PLATE_PATTERN = "AAA0000"
 MERCOSUL_PLATE_PATTERN = "AAA0A00"
 
 # Mercosul Color in HSV: 115, 255, 153
+
+plate_classifier = cv2.CascadeClassifier(
+    cv2.data.haarcascades + "haarcascade_russian_plate_number.xml"
+)
 
 
 def is_old_format(text):
@@ -84,12 +87,26 @@ def get_possible_plates(text, is_mercosul=None):
     return {mercosul_pattern_plate} if is_mercosul else {old_pattern_plate}
 
 
+def resize_image(img):
+    h, w = img.shape[:2]
+    aspect_ratio = h / w
+    new_width = 480
+    new_height = int(new_width * aspect_ratio)
+
+    return cv2.resize(img, (new_width, new_height))
+
+
 def treat_image(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray, (3, 3), 0)
     b_filter = cv2.bilateralFilter(blur, 11, 17, 17)
     thresh = cv2.threshold(b_filter, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
     invert = cv2.bitwise_not(thresh)
+
+    # Morph open to remove noise and invert image
+    # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+    # opening = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=1)
+    # invert = 255 - opening
 
     return gray, blur, b_filter, thresh, invert
 
@@ -103,7 +120,7 @@ def read_plate(plate_img):
 
     strings = pytesseract.image_to_string(
         treated_img,
-        lang="por",
+        lang="eng",
         config="--psm 6 -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",
     ).split()
     strings.append("".join(strings))
@@ -112,6 +129,22 @@ def read_plate(plate_img):
     )
 
     return set(filter(lambda string: is_plate_format(string, mercosul), strings))
+
+
+def recognize_plate(img):
+    img = resize_image(img)
+    b_filter = treat_image(img)[2]
+    plates = plate_classifier.detectMultiScale(b_filter, 1.2, 4)
+
+    for x, y, w, h in plates:
+        readed = read_plate(img[y : y + h, x : x + w])
+        if len(readed) > 0:
+            print("Plate:", *readed)
+            return set(readed)
+        img = cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+    cv2.imshow("Camera:", img)
+    return set()
 
 
 def get_ipv4():
