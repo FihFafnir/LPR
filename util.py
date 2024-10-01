@@ -172,6 +172,7 @@ placas_registradas = {
     "QSB1175": "Pessoa 3",
     "QFZ4J04": "Pessoa 4",
     "QFS9889": "Pessoa 5",
+    # ""
 }
 
 
@@ -213,36 +214,49 @@ def recognize_plate(img):
 
     for x, y, w, h in plates:
         readed = read_plate(img[y : y + h, x : x + w])
+        img = cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+        cv2.imshow("Camera:", img)
         if len(readed) > 0:
-            img = cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            similarity_plate = max(
-                map(lambda r: max_similarity(placas_registradas, r), readed),
-                key=lambda s: s[1],
-            )
+            # similarity_plate = max(
+            #     map(lambda r: max_similarity(placas_registradas, r), readed),
+            #     key=lambda s: s[1],
+            # )
 
             img = cv2.putText(
                 img,
-                f"{similarity_plate[0]} ({round(similarity_plate[1] * 100, 2)}%) - {placas_registradas[similarity_plate[0]]}",
+                f"{"/".join(readed)}",
                 (x, y - 5),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.5,
-                (0, 255, 0),
+                (0, 0, 255),
                 1,
                 cv2.LINE_AA,
                 False,
             )
-            cv2.imshow("Camera:", img)
-            cv2.imwrite(
-                f"./treated_images/readed_plate_{len(glob.glob('./treated_images/readed_plate_*.jpg')) + 1}.jpg",
-                img,
-            )
+            # img = cv2.putText(
+            #     img,
+            #     f"{similarity_plate[0]} ({round(similarity_plate[1] * 100, 2)}%) - {placas_registradas[similarity_plate[0]]}",
+            #     (x, y - 5),
+            #     cv2.FONT_HERSHEY_SIMPLEX,
+            #     0.5,
+            #     (0, 255, 0),
+            #     1,
+            #     cv2.LINE_AA,
+            #     False,
+            # )
+            # cv2.imwrite(
+            #     f"./treated_images/readed_plate_{len(glob.glob('./treated_images/readed_plate_*.jpg')) + 1}.jpg",
+            #     img,
+            # )
 
-            print(similarity_plate)
+            # print(similarity_plate)
 
             print("Plate:", *readed)
-            return set(readed)
+            # return set(readed)
 
-    return set()
+    cv2.imshow("Camera:", img)
+    # return set()
 
 
 def get_ipv4():

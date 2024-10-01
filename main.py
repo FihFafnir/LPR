@@ -1,29 +1,27 @@
 from util import *
 import glob
 
-# print(similarity("QFS9889", "OFS4889"))
 
+cap = cv2.VideoCapture(0)
 
-# cap = cv2.VideoCapture(0)
+while cv2.waitKey(1) != ord("q"):
+    # Exemplo de uso com um URL RTSP
+    # rtsp_url = 'rtsp://seu_usuario:senha@endereco_ip_da_camera:554/caminho_do_stream' or http:endereco_ip_da_camera:8080
+    # streamer = VideoStreamer(rtsp_url)
+    # streamer.start_capture()
 
-# while cv2.waitKey(1) != ord("q"):
-# Exemplo de uso com um URL RTSP
-# rtsp_url = 'rtsp://seu_usuario:senha@endereco_ip_da_camera:554/caminho_do_stream' or http:endereco_ip_da_camera:8080
-# streamer = VideoStreamer(rtsp_url)
-# streamer.start_capture()
+    ret, frame = cap.read()
+    recognize_plate(frame)
 
-# ret, frame = cap.read()
-# recognize_plate(frame)
+cap.release()
+cv2.destroyAllWindows()
 
-# cap.release()
-# cv2.destroyAllWindows()
+# filepaths = sorted(glob.glob("./images/*.jpg"))
 
-filepaths = sorted(glob.glob("./images/*.jpg"))
+# for filepath in filepaths:
+#     img = cv2.imread(filepath)
 
-for filepath in filepaths:
-    img = cv2.imread(filepath)
+#     recognize_plate(img)
 
-    recognize_plate(img)
-
-    while cv2.waitKey(1) != ord("q"):
-        pass
+#     while cv2.waitKey(1) != ord("q"):
+#         pass
