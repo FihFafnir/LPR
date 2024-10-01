@@ -108,6 +108,7 @@ def treat_image(img):
     opening = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=1)
     closing = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel, iterations=1)
     invert = 255 - closing
+
     return gray, blur, b_filter, thresh, invert
 
 
